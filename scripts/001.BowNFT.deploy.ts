@@ -3,21 +3,25 @@ import CaverExtKas from "caver-js-ext-kas";
 import dotenv from "dotenv";
 
 export const headers = {
-  Authorization: process.env.KAS_AUTHORIZATION!,
-  "x-chain-id": process.env.KAS_CHAIN_ID!,
+  Authorization: process.env.BAOBAB_KAS_AUTHORIZATION!,
+  "x-chain-id": process.env.BAOBAB_KAS_CHAIN_ID!,
   "Content-Type": "application/json",
 };
 
-const { KAS_ACCESS_KEY, KAS_SECRET_ACCESS_KEY, KAS_CHAIN_ID } = process.env;
+const {
+  BAOBAB_KAS_ACCESS_KEY,
+  BAOBAB_KAS_SECRET_ACCESS_KEY,
+  BAOBAB_KAS_CHAIN_ID,
+} = process.env;
 
 async function main() {
   const [deployer, one] = await ethers.getSigners();
   console.log(`🔱 Deploying contracts with the account: ${deployer.address}`);
 
   const caver = new CaverExtKas(
-    KAS_CHAIN_ID,
-    KAS_ACCESS_KEY,
-    KAS_SECRET_ACCESS_KEY
+    BAOBAB_KAS_CHAIN_ID,
+    BAOBAB_KAS_ACCESS_KEY,
+    BAOBAB_KAS_SECRET_ACCESS_KEY
   );
 
   const BowNFT = await ethers.getContractFactory("BowNFT");
@@ -66,7 +70,7 @@ async function main() {
 
   const { rawTransaction } = await caver.klay.accounts.signTransaction(
     tx,
-    process.env.BAOBAB_PRIVATE_KEY
+    process.env.BAOBAB_ADMIN_PRIVATE_KEY
   );
 
   console.log("rawTransaction", rawTransaction);

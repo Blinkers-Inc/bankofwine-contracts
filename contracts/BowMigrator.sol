@@ -4,16 +4,16 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./BowNFT.sol";
+import "./BowMNFT.sol";
 
 contract BowMigrator is AccessControl {
-    bytes32 public constant MIGRATOR_ROLE = keccak256("MIGRATOR_ROLE");
-
     ERC721 private preNFT;
     BowNFT private bowNFT;
-    BowNFT private bowMNFT;
+    BowMNFT private bowMNFT;
 
     event Migrate(address indexed owner, uint256 tokenId, bool isMNFT);
     event SetNFTAddress(uint256 indexed order, address NFTAddress);
+    event Transfer(address indexed from, address indexed to, uint256 tokenId);
 
     constructor(
         address _preNFTAddress,
@@ -21,10 +21,18 @@ contract BowMigrator is AccessControl {
         address _MNFTAddress
     ) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MIGRATOR_ROLE, msg.sender);
         preNFT = ERC721(_preNFTAddress);
         bowNFT = BowNFT(_NFTAddress);
-        bowMNFT = BowNFT(_MNFTAddress);
+        bowMNFT = BowMNFT(_MNFTAddress);
+    }
+
+    function transferPreNFT(address _to, uint256 _tokenId)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(preNFT.ownerOf(_tokenId) == address(this), "Not owner");
+
+        preNFT.safeTransferFrom(address(this), _to, _tokenId);
     }
 
     function getNFTAddress(uint256 _order) public view returns (address) {
@@ -48,7 +56,7 @@ contract BowMigrator is AccessControl {
         } else if (_order == 1) {
             bowNFT = BowNFT(_NFTAddress);
         } else if (_order == 2) {
-            bowMNFT = BowNFT(_NFTAddress);
+            bowMNFT = BowMNFT(_NFTAddress);
         } else {
             revert("Exceed order");
         }
@@ -56,24 +64,22 @@ contract BowMigrator is AccessControl {
         emit SetNFTAddress(_order, _NFTAddress);
     }
 
-    function migrate(
-        address _owner,
-        uint256 _tokenId,
-        bool _isMNFT
-    ) external {
-        require(preNFT.ownerOf(_tokenId) == _owner, "Not owner");
+    function migrate(uint256 _tokenId, bool _isMNFT) external {
+        address sender = _msgSender();
 
-        preNFT.safeTransferFrom(_owner, address(this), _tokenId);
+        require(preNFT.ownerOf(_tokenId) == sender, "Not owner");
+
+        preNFT.safeTransferFrom(sender, address(this), _tokenId);
 
         string memory tokenURI = preNFT.tokenURI(_tokenId);
 
         if (_isMNFT) {
-            bowMNFT.safeMint(_owner, tokenURI);
+            bowMNFT.safeMint(sender, tokenURI);
         } else {
-            bowNFT.safeMint(_owner, tokenURI);
+            bowNFT.safeMint(sender, tokenURI);
         }
 
-        emit Migrate(_owner, _tokenId, _isMNFT);
+        emit Migrate(sender, _tokenId, _isMNFT);
     }
 
     function onERC721Received(

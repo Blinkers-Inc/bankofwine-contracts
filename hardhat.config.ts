@@ -10,7 +10,11 @@ const config: HardhatUserConfig = {
   solidity: "0.8.16",
   networks: {
     baobab: {
-      accounts: [process.env.BAOBAB_PRIVATE_KEY!, process.env.TEST_KEY_1!],
+      accounts: [
+        process.env.BAOBAB_ADMIN_PRIVATE_KEY!,
+        process.env.TEST_KEY_ONE!,
+        process.env.TEST_KEY_TWO!,
+      ],
       chainId: 1001,
       gasPrice: 250_000_000_000,
       url: "https://api.baobab.klaytn.net:8651",

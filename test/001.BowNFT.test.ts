@@ -21,17 +21,17 @@ describe("001.BowNFT", async () => {
   });
 
   describe("Validations", () => {
-    it("Function : Read : name : Success✅", async () => {
+    it("Read : name : Success✅", async () => {
       const name = await bowNFT.name();
       expect(name).to.equal("Bank of Wine Token");
     });
 
-    it("Function : Read : symbol : Success✅", async () => {
+    it("Read : symbol : Success✅", async () => {
       const symbol = await bowNFT.symbol();
       expect(symbol).to.equal("BOWT");
     });
 
-    it("Function : Read : hasRole : Success✅", async () => {
+    it("Read : hasRole : Success✅", async () => {
       const hasMinterRoleAdminAddress = await bowNFT.hasRole(
         minterRole,
         admin.address
@@ -47,7 +47,7 @@ describe("001.BowNFT", async () => {
   });
 
   describe("Transactions", () => {
-    it("Function : Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
+    it("Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
       const safeMintTx = await bowNFT
         .connect(admin)
         .safeMint(admin.address, "www.bow.com/1");
@@ -63,7 +63,7 @@ describe("001.BowNFT", async () => {
       expect(tokenURI).to.equal("www.bow.com/1");
     });
 
-    it("Function : Transaction : safeMint : Success✅ : tokenId 2", async () => {
+    it("Transaction : safeMint : Success✅ : tokenId 2", async () => {
       const safeMintTx = await bowNFT
         .connect(admin)
         .safeMint(admin.address, "www.bow.com/2");
@@ -79,7 +79,7 @@ describe("001.BowNFT", async () => {
       expect(tokenURI).to.equal("www.bow.com/2");
     });
 
-    it("Function : Transaction : safeMint : Failed❌ : AccessControl error", async () => {
+    it("Transaction : safeMint : Failed❌ : AccessControl error", async () => {
       const safeMintTx = bowNFT
         .connect(one)
         .safeMint(one.address, "www.bow.com/3");
@@ -89,7 +89,7 @@ describe("001.BowNFT", async () => {
       );
     });
 
-    it("Function : Transaction : grantRole : Success✅ : Give MINTER_ROLE to one address", async () => {
+    it("Transaction : grantRole : Success✅ : Give MINTER_ROLE to one address", async () => {
       const grantRoleTx = bowNFT
         .connect(admin)
         .grantRole(minterRole, one.address);
@@ -105,7 +105,7 @@ describe("001.BowNFT", async () => {
       expect(hasMinterRoleOneAddress).to.equal(true);
     });
 
-    it("Function : Transaction : safeMint : Success✅ : tokenId 2 : one address also can mint by self", async () => {
+    it("Transaction : safeMint : Success✅ : tokenId 2 : one address also can mint by self", async () => {
       const safeMintTx = await bowNFT
         .connect(one)
         .safeMint(one.address, "www.bow.com/3");

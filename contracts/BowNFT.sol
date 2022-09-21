@@ -27,6 +27,13 @@ contract BowNFT is
         _grantRole(MINTER_ROLE, msg.sender);
     }
 
+    function setTokenURI(uint256 tokenId, string memory _tokenURI)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _setTokenURI(tokenId, _tokenURI);
+    }
+
     function safeMint(address _to, string memory _uri)
         public
         onlyRole(MINTER_ROLE)

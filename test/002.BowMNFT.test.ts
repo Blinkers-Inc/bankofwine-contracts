@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-describe("002.BowMNFT", async () => {
+describe("002.BowMNFT : soul-bound NFT", async () => {
   const minterRole = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes("MINTER_ROLE")
   );
@@ -20,17 +20,17 @@ describe("002.BowMNFT", async () => {
   });
 
   describe("Validations", () => {
-    it("Function : Read : name : Success✅", async () => {
+    it("Read : name : Success✅", async () => {
       const name = await bowMNFT.name();
       expect(name).to.equal("Bank of Wine Memory Token");
     });
 
-    it("Function : Read : symbol : Success✅", async () => {
+    it("Read : symbol : Success✅", async () => {
       const symbol = await bowMNFT.symbol();
       expect(symbol).to.equal("BOWMT");
     });
 
-    it("Function : Read : hasRole : Success✅", async () => {
+    it("Read : hasRole : Success✅", async () => {
       const hasMinterRoleAdminAddress = await bowMNFT.hasRole(
         minterRole,
         admin.address
@@ -44,7 +44,7 @@ describe("002.BowMNFT", async () => {
       expect(hasMinterRoleOneAddress).to.equal(false);
     });
 
-    it("Function : Read : supportsInterface : Success✅ : support IERC5192 => 0xb45a3c0e", async () => {
+    it("Read : supportsInterface : Success✅ : support IERC5192 => 0xb45a3c0e", async () => {
       const interfaceId = "0xb45a3c0e"; // IERC5192
       const supportsInterface = await bowMNFT.supportsInterface(interfaceId);
       expect(supportsInterface).to.equal(true);
@@ -52,7 +52,7 @@ describe("002.BowMNFT", async () => {
   });
 
   describe("Transaction : safeMint", () => {
-    it("Function : Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
+    it("Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
       const safeMintTx = await bowMNFT
         .connect(admin)
         .safeMint(admin.address, "www.bow.com/1");
@@ -68,7 +68,7 @@ describe("002.BowMNFT", async () => {
       expect(tokenURI).to.equal("www.bow.com/1");
     });
 
-    it("Function : Transaction : safeMint : Success✅ : tokenId 2", async () => {
+    it("Transaction : safeMint : Success✅ : tokenId 2", async () => {
       const safeMintTx = await bowMNFT
         .connect(admin)
         .safeMint(admin.address, "www.bow.com/2");
@@ -84,7 +84,7 @@ describe("002.BowMNFT", async () => {
       expect(tokenURI).to.equal("www.bow.com/2");
     });
 
-    it("Function : Transaction : safeMint : Failed❌ : AccessControl error", async () => {
+    it("Transaction : safeMint : Failed❌ : AccessControl error", async () => {
       const safeMintTx = bowMNFT
         .connect(one)
         .safeMint(one.address, "www.bow.com/3");
@@ -94,7 +94,7 @@ describe("002.BowMNFT", async () => {
       );
     });
 
-    it("Function : Transaction : grantRole : Success✅ : Give MINTER_ROLE to one address", async () => {
+    it("Transaction : grantRole : Success✅ : Give MINTER_ROLE to one address", async () => {
       const grantRoleTx = bowMNFT
         .connect(admin)
         .grantRole(minterRole, one.address);
@@ -110,7 +110,7 @@ describe("002.BowMNFT", async () => {
       expect(hasMinterRoleOneAddress).to.equal(true);
     });
 
-    it("Function : Transaction : safeMint : Success✅ : tokenId 2 : one address also can mint by self", async () => {
+    it("Transaction : safeMint : Success✅ : tokenId 2 : one address also can mint by self", async () => {
       const safeMintTx = await bowMNFT
         .connect(one)
         .safeMint(admin.address, "www.bow.com/3");
@@ -128,7 +128,7 @@ describe("002.BowMNFT", async () => {
   });
 
   describe("Transaction : transfer", () => {
-    it("Function : Transaction : transferFrom : Failed❌ : Token is soul-bound and cannot be transferred", async () => {
+    it("Transaction : transferFrom : Failed❌ : Token is soul-bound and cannot be transferred", async () => {
       const transferFromTx = bowMNFT
         .connect(admin)
         .transferFrom(admin.address, one.address, 1);
@@ -138,7 +138,7 @@ describe("002.BowMNFT", async () => {
       );
     });
 
-    it("Function : Transaction : safeTransferFrom : Failed❌ : Token is soul-bound and cannot be transferred", async () => {
+    it("Transaction : safeTransferFrom : Failed❌ : Token is soul-bound and cannot be transferred", async () => {
       const safeTransferFromTx = bowMNFT
         .connect(admin)
         ["safeTransferFrom(address,address,uint256)"](
@@ -152,7 +152,7 @@ describe("002.BowMNFT", async () => {
       );
     });
 
-    it("Function : Transaction : safeTransferFrom : Failed❌ : Token is soul-bound and cannot be transferred", async () => {
+    it("Transaction : safeTransferFrom : Failed❌ : Token is soul-bound and cannot be transferred", async () => {
       const safeTransferFromTx = bowMNFT
         .connect(admin)
         ["safeTransferFrom(address,address,uint256,bytes)"](
@@ -167,7 +167,7 @@ describe("002.BowMNFT", async () => {
       );
     });
 
-    it("Function : Transaction : setTransferPermission : Success✅ : Only admin available", async () => {
+    it("Transaction : setTransferPermission : Success✅ : Only admin available", async () => {
       const preHasTransferPermission = await bowMNFT.locked(1);
       expect(preHasTransferPermission).to.equal(true);
 
@@ -179,7 +179,7 @@ describe("002.BowMNFT", async () => {
       expect(curHasTransferPermission).to.equal(false);
     });
 
-    it("Function : Transaction : transferFrom : Success✅", async () => {
+    it("Transaction : transferFrom : Success✅", async () => {
       const transferFromTx = bowMNFT
         .connect(admin)
         .transferFrom(admin.address, one.address, 1);
@@ -189,7 +189,7 @@ describe("002.BowMNFT", async () => {
         .withArgs(admin.address, one.address, 1);
     });
 
-    it("Function : Transaction : safeTransferFrom : Success✅", async () => {
+    it("Transaction : safeTransferFrom : Success✅", async () => {
       const safeTransferFromTx = bowMNFT
         .connect(admin)
         ["safeTransferFrom(address,address,uint256)"](
@@ -203,7 +203,7 @@ describe("002.BowMNFT", async () => {
         .withArgs(admin.address, one.address, 2);
     });
 
-    it("Function : Transaction : safeTransferFrom : Success✅", async () => {
+    it("Transaction : safeTransferFrom : Success✅", async () => {
       const safeTransferFromTx = bowMNFT
         .connect(admin)
         ["safeTransferFrom(address,address,uint256,bytes)"](
