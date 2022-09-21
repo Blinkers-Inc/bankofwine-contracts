@@ -6,10 +6,8 @@ import { HardhatUserConfig } from "hardhat/config";
 
 dotenv.config();
 
-console.log("process.env.BAOBAB_PRIVATE_KEY", process.env.BAOBAB_PRIVATE_KEY);
-
 const config: HardhatUserConfig = {
-  solidity: "0.8.13",
+  solidity: "0.8.16",
   networks: {
     baobab: {
       accounts: [process.env.BAOBAB_PRIVATE_KEY!, process.env.TEST_KEY_1!],
