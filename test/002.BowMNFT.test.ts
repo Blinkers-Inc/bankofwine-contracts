@@ -55,7 +55,7 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
     it("Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
       const safeMintTx = await bowMNFT
         .connect(admin)
-        .safeMint(admin.address, "www.bow.com/1");
+        .safeMint(admin.address, "www.bow.com/1", 100_000);
       await safeMintTx.wait();
 
       const balanceOf = await bowMNFT.balanceOf(admin.address);
@@ -71,7 +71,7 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
     it("Transaction : safeMint : Success✅ : tokenId 2", async () => {
       const safeMintTx = await bowMNFT
         .connect(admin)
-        .safeMint(admin.address, "www.bow.com/2");
+        .safeMint(admin.address, "www.bow.com/2", 100_000);
       await safeMintTx.wait();
 
       const balanceOf = await bowMNFT.balanceOf(admin.address);
@@ -87,7 +87,7 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
     it("Transaction : safeMint : Failed❌ : AccessControl error", async () => {
       const safeMintTx = bowMNFT
         .connect(one)
-        .safeMint(one.address, "www.bow.com/3");
+        .safeMint(one.address, "www.bow.com/3", 100_000);
 
       await expect(safeMintTx).to.revertedWith(
         `AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6`
@@ -110,10 +110,10 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
       expect(hasMinterRoleOneAddress).to.equal(true);
     });
 
-    it("Transaction : safeMint : Success✅ : tokenId 2 : one address also can mint by self", async () => {
+    it("Transaction : safeMint : Success✅ : tokenId 3 : one address also can mint by self", async () => {
       const safeMintTx = await bowMNFT
         .connect(one)
-        .safeMint(admin.address, "www.bow.com/3");
+        .safeMint(admin.address, "www.bow.com/3", 100_000);
       await safeMintTx.wait();
 
       const balanceOf = await bowMNFT.balanceOf(admin.address);

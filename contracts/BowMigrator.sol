@@ -64,7 +64,11 @@ contract BowMigrator is AccessControl {
         emit SetNFTAddress(_order, _NFTAddress);
     }
 
-    function migrate(uint256 _tokenId, bool _isMNFT) external {
+    function migrate(
+        uint256 _tokenId,
+        uint256 _LWIN,
+        bool _isMNFT
+    ) external {
         address sender = _msgSender();
 
         require(preNFT.ownerOf(_tokenId) == sender, "Not owner");
@@ -74,9 +78,9 @@ contract BowMigrator is AccessControl {
         string memory tokenURI = preNFT.tokenURI(_tokenId);
 
         if (_isMNFT) {
-            bowMNFT.safeMint(sender, tokenURI);
+            bowMNFT.safeMint(sender, tokenURI, _LWIN);
         } else {
-            bowNFT.safeMint(sender, tokenURI);
+            bowNFT.safeMint(sender, tokenURI, _LWIN);
         }
 
         emit Migrate(sender, _tokenId, _isMNFT);

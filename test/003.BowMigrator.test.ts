@@ -40,7 +40,7 @@ describe("003.BowMigrator", async () => {
     await bowMigrator.deployed();
   });
 
-  describe("Validations", () => {
+  describe("Validation", () => {
     it("Read : getNFTAddress : Success✅", async () => {
       const order0 = await bowMigrator.getNFTAddress(0);
       expect(order0).to.equal(preNFT.address);
@@ -61,7 +61,7 @@ describe("003.BowMigrator", async () => {
       for (let i = 1; i <= 6; i++) {
         const safeMintTx = preNFT
           .connect(admin)
-          .safeMint(admin.address, `www.bow.com/${i}`);
+          .safeMint(admin.address, `www.bow.com/${i}`, 100_000);
 
         await expect(safeMintTx)
           .to.emit(preNFT, "Transfer")
@@ -105,7 +105,9 @@ describe("003.BowMigrator", async () => {
     it("Transaction : migrate : migrator : Failed❌ : AccessControl error", async () => {
       for (let i = 1; i <= 6; i++) {
         const isMNFT = i % 2 === 0;
-        const migrateTx = bowMigrator.connect(admin).migrate(i, isMNFT);
+        const migrateTx = bowMigrator
+          .connect(admin)
+          .migrate(i, 100_000, isMNFT);
 
         await expect(migrateTx).to.reverted;
         // await expect(migrateTx).to.revertedWith(
@@ -149,7 +151,9 @@ describe("003.BowMigrator", async () => {
     it("Transaction : migrate : migrator : Success✅ : Odd is NFT, Even is MNFT", async () => {
       for (let i = 1; i <= 6; i++) {
         const isMNFT = i % 2 === 0;
-        const migrateTx = bowMigrator.connect(admin).migrate(i, isMNFT);
+        const migrateTx = bowMigrator
+          .connect(admin)
+          .migrate(i, 100_000, isMNFT);
 
         await expect(migrateTx)
           .to.emit(bowMigrator, "Migrate")
