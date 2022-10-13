@@ -15,7 +15,11 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
     console.log(`🔱 Deploying contracts with the account: ${admin.address}`);
 
     const BowMNFT = await ethers.getContractFactory("BowMNFT");
-    bowMNFT = await BowMNFT.deploy("Bank of Wine Memory Token", "BOWMT");
+    bowMNFT = await BowMNFT.deploy(
+      "Bank of Wine Memory Token",
+      "B.O.W M-NFT",
+      "https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/"
+    );
     await bowMNFT.deployed();
   });
 
@@ -27,7 +31,7 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
 
     it("Read : symbol : Success✅", async () => {
       const symbol = await bowMNFT.symbol();
-      expect(symbol).to.equal("BOWMT");
+      expect(symbol).to.equal("B.O.W M-NFT");
     });
 
     it("Read : hasRole : Success✅", async () => {
@@ -44,6 +48,13 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
       expect(hasMinterRoleOneAddress).to.equal(false);
     });
 
+    it("Read : baseURI : Success✅", async () => {
+      const baseURI = await bowMNFT.baseURI();
+      expect(baseURI).to.equal(
+        "https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/"
+      );
+    });
+
     it("Read : supportsInterface : Success✅ : support IERC5192 => 0xb45a3c0e", async () => {
       const interfaceId = "0xb45a3c0e"; // IERC5192
       const supportsInterface = await bowMNFT.supportsInterface(interfaceId);
@@ -53,9 +64,7 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
 
   describe("Transaction : safeMint", () => {
     it("Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
-      const safeMintTx = await bowMNFT
-        .connect(admin)
-        .safeMint(admin.address, "www.bow.com/1", 100_000);
+      const safeMintTx = await bowMNFT.connect(admin).safeMint(admin.address);
       await safeMintTx.wait();
 
       const balanceOf = await bowMNFT.balanceOf(admin.address);
@@ -65,13 +74,13 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
       expect(ownerOf).to.equal(admin.address);
 
       const tokenURI = await bowMNFT.tokenURI(1);
-      expect(tokenURI).to.equal("www.bow.com/1");
+      expect(tokenURI).to.equal(
+        "https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/1.json"
+      );
     });
 
     it("Transaction : safeMint : Success✅ : tokenId 2", async () => {
-      const safeMintTx = await bowMNFT
-        .connect(admin)
-        .safeMint(admin.address, "www.bow.com/2", 100_000);
+      const safeMintTx = await bowMNFT.connect(admin).safeMint(admin.address);
       await safeMintTx.wait();
 
       const balanceOf = await bowMNFT.balanceOf(admin.address);
@@ -81,13 +90,13 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
       expect(ownerOf).to.equal(admin.address);
 
       const tokenURI = await bowMNFT.tokenURI(2);
-      expect(tokenURI).to.equal("www.bow.com/2");
+      expect(tokenURI).to.equal(
+        "https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/2.json"
+      );
     });
 
     it("Transaction : safeMint : Failed❌ : AccessControl error", async () => {
-      const safeMintTx = bowMNFT
-        .connect(one)
-        .safeMint(one.address, "www.bow.com/3", 100_000);
+      const safeMintTx = bowMNFT.connect(one).safeMint(one.address);
 
       await expect(safeMintTx).to.revertedWith(
         `AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6`
@@ -111,9 +120,7 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
     });
 
     it("Transaction : safeMint : Success✅ : tokenId 3 : one address also can mint by self", async () => {
-      const safeMintTx = await bowMNFT
-        .connect(one)
-        .safeMint(admin.address, "www.bow.com/3", 100_000);
+      const safeMintTx = await bowMNFT.connect(one).safeMint(admin.address);
       await safeMintTx.wait();
 
       const balanceOf = await bowMNFT.balanceOf(admin.address);
@@ -123,7 +130,9 @@ describe("002.BowMNFT : soul-bound NFT", async () => {
       expect(ownerOf).to.equal(admin.address);
 
       const tokenURI = await bowMNFT.tokenURI(3);
-      expect(tokenURI).to.equal("www.bow.com/3");
+      expect(tokenURI).to.equal(
+        "https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/3.json"
+      );
     });
   });
 

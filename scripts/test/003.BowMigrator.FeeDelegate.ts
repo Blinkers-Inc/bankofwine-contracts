@@ -3,34 +3,46 @@ import CaverExtKas from "caver-js-ext-kas";
 import { ZERO_ADDRESS } from "../../helpers/constant";
 
 const {
-  BAOBAB_KAS_CHAIN_ID,
-  BAOBAB_KAS_ACCESS_KEY,
-  BAOBAB_KAS_SECRET_ACCESS_KEY,
-  BAOBAB_ADMIN_PRIVATE_KEY,
+  KAS_CHAIN_ID,
+  KAS_ACCESS_KEY,
+  KAS_SECRET_ACCESS_KEY,
+  ADMIN_PRIVATE_KEY,
 } = process.env;
 
 async function main() {
   const caver = new CaverExtKas(
-    BAOBAB_KAS_CHAIN_ID,
-    BAOBAB_KAS_ACCESS_KEY,
-    BAOBAB_KAS_SECRET_ACCESS_KEY
+    KAS_CHAIN_ID,
+    KAS_ACCESS_KEY,
+    KAS_SECRET_ACCESS_KEY
   );
 
   const [admin, one, two] = await ethers.getSigners();
   console.log(`🔱 Deploying contracts with the account: ${admin.address}`);
 
   const PreNFT = await ethers.getContractFactory("BowNFT");
-  const preNFT = await PreNFT.deploy("Pre token", "PRET");
+  const preNFT = await PreNFT.deploy(
+    "Pre token",
+    "PRET",
+    "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+  );
   await preNFT.deployed();
   console.log(`💎 PreNFT deployed to: ${preNFT.address}`);
 
   const BowNFT = await ethers.getContractFactory("BowNFT");
-  const bowNFT = await BowNFT.deploy("Bank of Wine Token", "BOWT");
+  const bowNFT = await BowNFT.deploy(
+    "Bank of Wine Token",
+    "B.O.W NFT",
+    "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+  );
   await bowNFT.deployed();
   console.log(`💎 BowNFT deployed to: ${bowNFT.address}`);
 
   const BowMNFT = await ethers.getContractFactory("BowMNFT");
-  const bowMNFT = await BowMNFT.deploy("Bank of Wine Token", "BOWT");
+  const bowMNFT = await BowMNFT.deploy(
+    "Bank of Wine Token",
+    "B.O.W NFT",
+    "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+  );
   await bowMNFT.deployed();
   console.log(`💎 BowMNFT deployed to: ${bowMNFT.address}`);
 
@@ -61,10 +73,7 @@ async function main() {
   for (let i = 1; i <= 6; i++) {
     const safeMintAbi = preNFT
       .connect(admin)
-      .interface.encodeFunctionData("safeMint", [
-        admin.address,
-        `www.bow.com${i}`,
-      ]);
+      .interface.encodeFunctionData("safeMint", [admin.address]);
 
     const tx1 = {
       type: "FEE_DELEGATED_SMART_CONTRACT_EXECUTION",
@@ -77,7 +86,7 @@ async function main() {
 
     const { rawTransaction } = await caver.klay.accounts.signTransaction(
       tx1,
-      BAOBAB_ADMIN_PRIVATE_KEY
+      ADMIN_PRIVATE_KEY
     );
 
     console.log("rawTransaction", rawTransaction);
@@ -109,7 +118,7 @@ async function main() {
   };
 
   const { rawTransaction: rawTransaction2 } =
-    await caver.klay.accounts.signTransaction(tx2, BAOBAB_ADMIN_PRIVATE_KEY);
+    await caver.klay.accounts.signTransaction(tx2, ADMIN_PRIVATE_KEY);
 
   console.log("rawTransaction2", rawTransaction2);
 
@@ -146,7 +155,7 @@ async function main() {
   };
 
   const { rawTransaction: rawTransaction3 } =
-    await caver.klay.accounts.signTransaction(tx3, BAOBAB_ADMIN_PRIVATE_KEY);
+    await caver.klay.accounts.signTransaction(tx3, ADMIN_PRIVATE_KEY);
 
   console.log("rawTransaction3", rawTransaction3);
 
@@ -185,7 +194,7 @@ async function main() {
 
     const { rawTransaction } = await caver.klay.accounts.signTransaction(
       tx1,
-      BAOBAB_ADMIN_PRIVATE_KEY
+      ADMIN_PRIVATE_KEY
     );
 
     console.log("rawTransaction", rawTransaction);
@@ -222,10 +231,7 @@ async function main() {
   };
 
   const { rawTransaction: rawTransactionNFTMinterRole } =
-    await caver.klay.accounts.signTransaction(
-      txToNFT,
-      BAOBAB_ADMIN_PRIVATE_KEY
-    );
+    await caver.klay.accounts.signTransaction(txToNFT, ADMIN_PRIVATE_KEY);
 
   console.log("rawTransactionNFTMinterRole", rawTransactionNFTMinterRole);
 
@@ -256,10 +262,7 @@ async function main() {
   };
 
   const { rawTransaction: rawTransactionMNFTMinterRole } =
-    await caver.klay.accounts.signTransaction(
-      txToMNFT,
-      BAOBAB_ADMIN_PRIVATE_KEY
-    );
+    await caver.klay.accounts.signTransaction(txToMNFT, ADMIN_PRIVATE_KEY);
 
   console.log("rawTransactionMNFTMinterRole", rawTransactionMNFTMinterRole);
 
@@ -291,18 +294,18 @@ async function main() {
 
     const { rawTransaction } = await caver.klay.accounts.signTransaction(
       tx1,
-      BAOBAB_ADMIN_PRIVATE_KEY
+      ADMIN_PRIVATE_KEY
     );
 
     console.log("rawTransaction", rawTransaction);
 
-    const result =
-      await caver.kas.wallet.requestFDRawTransactionPaidByGlobalFeePayer({
-        rlp: rawTransaction,
-        submit: true,
-      });
+    // const result =
+    //   await caver.kas.wallet.requestFDRawTransactionPaidByGlobalFeePayer({
+    //     rlp: rawTransaction,
+    //     submit: true,
+    //   });
 
-    console.log("result :>> ", result);
+    // console.log("result :>> ", result);
   }
 
   console.log(`💎 PreNFT deployed to: ${preNFT.address}`);

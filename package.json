@@ -6,9 +6,8 @@
   "scripts": {
     "test": "npx hardhat test",
     "test:dev": "dotenv -e .env.dev -- npx hardhat test",
-    "deploy:test": "npx hardhat run scripts/deploy_OWContractV1.ts",
-    "deploy:baobab": "dotenv -e .env.dev npx hardhat run ",
-    "deploy:cypress": "dotenv -e .env.prod npx hardhat run --network cypress ",
+    "deploy:dev": "dotenv -e .env.dev -- npx hardhat --network baobab run",
+    "deploy:prod": "dotenv -e .env.prod -- npx hardhat --network cypress run",
     "clean": "rm -rf artifacts/ & rm -rf cache/ & rm -rf typechain-types"
   },
   "keywords": [],

@@ -3,29 +3,37 @@ import CaverExtKas from "caver-js-ext-kas";
 import dotenv from "dotenv";
 
 export const headers = {
-  Authorization: process.env.BAOBAB_KAS_AUTHORIZATION!,
-  "x-chain-id": process.env.BAOBAB_KAS_CHAIN_ID!,
+  Authorization: process.env.KAS_AUTHORIZATION!,
+  "x-chain-id": process.env.KAS_CHAIN_ID!,
   "Content-Type": "application/json",
 };
 
-const {
-  BAOBAB_KAS_ACCESS_KEY,
-  BAOBAB_KAS_SECRET_ACCESS_KEY,
-  BAOBAB_KAS_CHAIN_ID,
-} = process.env;
+const { KAS_ACCESS_KEY, KAS_SECRET_ACCESS_KEY, KAS_CHAIN_ID } = process.env;
 
 async function main() {
   const [deployer, one] = await ethers.getSigners();
   console.log(`🔱 Deploying contracts with the account: ${deployer.address}`);
 
   const caver = new CaverExtKas(
-    BAOBAB_KAS_CHAIN_ID,
-    BAOBAB_KAS_ACCESS_KEY,
-    BAOBAB_KAS_SECRET_ACCESS_KEY
+    KAS_CHAIN_ID,
+    KAS_ACCESS_KEY,
+    KAS_SECRET_ACCESS_KEY
   );
 
+  // const BowNFT = await ethers.getContractFactory("BowNFT");
+  // const bowNFT = await BowNFT.deploy(
+  //   "Bank of Wine Token",
+  //   "B.O.W NFT",
+  //   "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+  // );
+  // await bowNFT.deployed();
+
   const BowNFT = await ethers.getContractFactory("BowNFT");
-  const bowNFT = await BowNFT.deploy("Bank of Wine Token", "BOWT");
+  const bowNFT = await BowNFT.deploy(
+    "I Love Coffee",
+    "I Love Coffee",
+    "I Love Coffee"
+  );
   await bowNFT.deployed();
 
   console.log(`💎 Proxy deployed to: ${bowNFT.address}`);
@@ -70,18 +78,18 @@ async function main() {
 
   const { rawTransaction } = await caver.klay.accounts.signTransaction(
     tx,
-    process.env.BAOBAB_ADMIN_PRIVATE_KEY
+    process.env.ADMIN_PRIVATE_KEY
   );
 
   console.log("rawTransaction", rawTransaction);
 
-  const result2 =
-    await caver.kas.wallet.requestFDRawTransactionPaidByGlobalFeePayer({
-      rlp: rawTransaction,
-      submit: true,
-    });
+  // const result2 =
+  //   await caver.kas.wallet.requestFDRawTransactionPaidByGlobalFeePayer({
+  //     rlp: rawTransaction,
+  //     submit: true,
+  //   });
 
-  console.log("result2 :>> ", result2);
+  // console.log("result2 :>> ", result2);
 
   // const { data: result } = await axios.post(
   //   "https://wallet-api.klaytnapi.com/v2/tx/fd/contract/execute",

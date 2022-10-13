@@ -20,15 +20,23 @@ describe("003.BowMigrator", async () => {
     console.log(`🔱 Deploying contracts with the account: ${admin.address}`);
 
     const PreNFT = await ethers.getContractFactory("BowNFT");
-    preNFT = await PreNFT.deploy("Pre token", "PRET");
+    preNFT = await PreNFT.deploy("Pre token", "PRET", "https://preNFT.com/");
     await preNFT.deployed();
 
     const BowNFT = await ethers.getContractFactory("BowNFT");
-    bowNFT = await BowNFT.deploy("Bank of Wine Token", "BOWT");
+    bowNFT = await BowNFT.deploy(
+      "Bank of Wine Token",
+      "B.O.W NFT",
+      "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+    );
     await bowNFT.deployed();
 
     const BowMNFT = await ethers.getContractFactory("BowMNFT");
-    bowMNFT = await BowMNFT.deploy("Bank of Wine Token", "BOWT");
+    bowMNFT = await BowMNFT.deploy(
+      "Bank of Wine Token",
+      "B.O.W NFT",
+      "https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/"
+    );
     await bowMNFT.deployed();
 
     const BowMigrator = await ethers.getContractFactory("BowMigrator");
@@ -59,9 +67,7 @@ describe("003.BowMigrator", async () => {
   describe("Transaction : safeMint : to prepare migration", () => {
     it("Transaction : preNFT : safeMint : Success✅ : admin - preNFT - 1,2,3,4,5,6", async () => {
       for (let i = 1; i <= 6; i++) {
-        const safeMintTx = preNFT
-          .connect(admin)
-          .safeMint(admin.address, `www.bow.com/${i}`, 100_000);
+        const safeMintTx = preNFT.connect(admin).safeMint(admin.address);
 
         await expect(safeMintTx)
           .to.emit(preNFT, "Transfer")
@@ -74,7 +80,7 @@ describe("003.BowMigrator", async () => {
         expect(ownerOf).to.equal(admin.address);
 
         const tokenURI = await preNFT.tokenURI(i);
-        expect(tokenURI).to.equal(`www.bow.com/${i}`);
+        expect(tokenURI).to.equal(`https://preNFT.com/${i}.json`);
       }
     });
   });
@@ -105,9 +111,7 @@ describe("003.BowMigrator", async () => {
     it("Transaction : migrate : migrator : Failed❌ : AccessControl error", async () => {
       for (let i = 1; i <= 6; i++) {
         const isMNFT = i % 2 === 0;
-        const migrateTx = bowMigrator
-          .connect(admin)
-          .migrate(i, 100_000, isMNFT);
+        const migrateTx = bowMigrator.connect(admin).migrate(i, isMNFT);
 
         await expect(migrateTx).to.reverted;
         // await expect(migrateTx).to.revertedWith(
@@ -151,34 +155,42 @@ describe("003.BowMigrator", async () => {
     it("Transaction : migrate : migrator : Success✅ : Odd is NFT, Even is MNFT", async () => {
       for (let i = 1; i <= 6; i++) {
         const isMNFT = i % 2 === 0;
-        const migrateTx = bowMigrator
-          .connect(admin)
-          .migrate(i, 100_000, isMNFT);
+        const migrateTx = await bowMigrator.connect(admin).migrate(i, isMNFT);
+        const receipt = await migrateTx.wait();
 
-        await expect(migrateTx)
-          .to.emit(bowMigrator, "Migrate")
-          .withArgs(admin.address, i, isMNFT);
+        const event = receipt.events.find(
+          (event: any) => event.event === "Migrate"
+        );
+
+        const [sender, isMnft, _, newTokenId] = event.args;
+
+        expect(sender).to.equal(admin.address);
+        expect(isMNFT).to.equal(isMnft);
+
+        const calcNewTokenId = i <= 2 ? 1 : i <= 4 ? 2 : 3;
+        expect(newTokenId).to.equal(calcNewTokenId);
       }
     });
   });
 
   describe("Verification", () => {
     it("Verification : 1,3,5 is new NFT / 2,4,6 is new MNFT", async () => {
-      const nfts = [1, 3, 5];
-      const mnfts = [2, 4, 6];
-
       for (let i = 1; i <= 3; i++) {
         const ownerOfNFT = await bowNFT.ownerOf(i);
         expect(ownerOfNFT).to.equal(admin.address);
 
         const tokenURINFT = await bowNFT.tokenURI(i);
-        expect(tokenURINFT).to.equal(`www.bow.com/${nfts[i - 1]}`);
+        expect(tokenURINFT).to.equal(
+          `https://for-test-migration.s3.ap-northeast-2.amazonaws.com/${i}.json`
+        );
 
         const ownerOfMNFT = await bowMNFT.ownerOf(i);
         expect(ownerOfMNFT).to.equal(admin.address);
 
         const tokenURIMNFT = await bowMNFT.tokenURI(i);
-        expect(tokenURIMNFT).to.equal(`www.bow.com/${mnfts[i - 1]}`);
+        expect(tokenURIMNFT).to.equal(
+          `https://for-test-migration-mnft.s3.ap-northeast-2.amazonaws.com/${i}.json`
+        );
       }
 
       const balanceOfNFT = await bowNFT.balanceOf(admin.address);

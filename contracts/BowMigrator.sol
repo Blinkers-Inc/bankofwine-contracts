@@ -11,7 +11,12 @@ contract BowMigrator is AccessControl {
     BowNFT private bowNFT;
     BowMNFT private bowMNFT;
 
-    event Migrate(address indexed owner, uint256 tokenId, bool isMNFT);
+    event Migrate(
+        address indexed owner,
+        bool isMNFT,
+        uint256 preTokenId,
+        uint256 newTokenId
+    );
     event SetNFTAddress(uint256 indexed order, address NFTAddress);
     event Transfer(address indexed from, address indexed to, uint256 tokenId);
 
@@ -64,26 +69,23 @@ contract BowMigrator is AccessControl {
         emit SetNFTAddress(_order, _NFTAddress);
     }
 
-    function migrate(
-        uint256 _tokenId,
-        uint256 _LWIN,
-        bool _isMNFT
-    ) external {
+    function migrate(uint256 _tokenId, bool _isMNFT)
+        external
+        returns (uint256 newTokenId_)
+    {
         address sender = _msgSender();
 
         require(preNFT.ownerOf(_tokenId) == sender, "Not owner");
 
         preNFT.safeTransferFrom(sender, address(this), _tokenId);
 
-        string memory tokenURI = preNFT.tokenURI(_tokenId);
-
         if (_isMNFT) {
-            bowMNFT.safeMint(sender, tokenURI, _LWIN);
+            newTokenId_ = bowMNFT.safeMint(sender);
         } else {
-            bowNFT.safeMint(sender, tokenURI, _LWIN);
+            newTokenId_ = bowNFT.safeMint(sender);
         }
 
-        emit Migrate(sender, _tokenId, _isMNFT);
+        emit Migrate(sender, _isMNFT, _tokenId, newTokenId_);
     }
 
     function onERC721Received(

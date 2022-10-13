@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract BowNFT is
     ERC721Enumerable,
@@ -16,43 +17,45 @@ contract BowNFT is
 {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.UintSet;
-
+    using Strings for uint256;
     Counters.Counter private _tokenIdCounter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    string public baseURI;
 
-    mapping(uint256 => uint256) private LWINByTokenId;
-    mapping(uint256 => EnumerableSet.UintSet) private tokenIdsByLWIN;
-
-    constructor(string memory _name, string memory _symbol)
-        ERC721(_name, _symbol)
-    {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        string memory _baseURI
+    ) ERC721(_name, _symbol) {
         _tokenIdCounter.increment();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
+        setBaseURI(_baseURI);
     }
 
-    function safeMint(
-        address _to,
-        string memory _uri,
-        uint256 _LWIN
-    ) public onlyRole(MINTER_ROLE) {
-        uint256 tokenId = _tokenIdCounter.current();
+    function safeMint(address _to)
+        public
+        onlyRole(MINTER_ROLE)
+        returns (uint256 tokenId_)
+    {
+        tokenId_ = _tokenIdCounter.current();
         _tokenIdCounter.increment();
 
-        _safeMint(_to, tokenId);
-        _setTokenURI(tokenId, _uri);
-        LWINByTokenId[tokenId] = _LWIN;
-        tokenIdsByLWIN[_LWIN].add(tokenId);
+        string memory uri = string.concat(Strings.toString(tokenId_), ".json");
+        _safeMint(_to, tokenId_);
+        _setTokenURI(tokenId_, uri);
     }
 
     function burn(uint256 _tokenId) public override {
         super.burn(_tokenId);
+    }
 
-        uint256 curLWIN = LWINByTokenId[_tokenId];
-
-        tokenIdsByLWIN[curLWIN].remove(_tokenId);
-        delete LWINByTokenId[_tokenId];
+    function setBaseURI(string memory _baseURI)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        baseURI = _baseURI;
     }
 
     function setTokenURI(uint256 tokenId, string memory _tokenURI)
@@ -60,41 +63,6 @@ contract BowNFT is
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         _setTokenURI(tokenId, _tokenURI);
-    }
-
-    function setLWIN(uint256 _tokenId, uint256 _LWIN)
-        public
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        require(LWINByTokenId[_tokenId] != 0, "invalid token id");
-
-        uint256 preLWIN = LWINByTokenId[_tokenId];
-
-        tokenIdsByLWIN[preLWIN].remove(_tokenId);
-        tokenIdsByLWIN[_LWIN].add(_tokenId);
-        LWINByTokenId[_tokenId] = _LWIN;
-    }
-
-    function LWIN(uint256 _tokenId) public view returns (uint256) {
-        require(LWINByTokenId[_tokenId] != 0, "invalid token id");
-
-        return LWINByTokenId[_tokenId];
-    }
-
-    function lengthOfTokenIdsByLWIN(uint256 _LWIN)
-        public
-        view
-        returns (uint256)
-    {
-        return tokenIdsByLWIN[_LWIN].length();
-    }
-
-    function tokenIdByLWIN(uint256 _LWIN, uint256 _index)
-        public
-        view
-        returns (uint256)
-    {
-        return tokenIdsByLWIN[_LWIN].at(_index);
     }
 
     function tokenURI(uint256 tokenId)
@@ -129,5 +97,9 @@ contract BowNFT is
         override(ERC721, ERC721URIStorage)
     {
         super._burn(tokenId);
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
     }
 }

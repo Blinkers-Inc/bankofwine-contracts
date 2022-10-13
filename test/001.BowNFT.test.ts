@@ -16,7 +16,11 @@ describe("001.BowNFT", async () => {
     console.log(`🔱 Deploying contracts with the account: ${admin.address}`);
 
     const BowNFT = await ethers.getContractFactory("BowNFT");
-    bowNFT = await BowNFT.deploy("Bank of Wine Token", "BOWT");
+    bowNFT = await BowNFT.deploy(
+      "Bank of Wine Token",
+      "B.O.W NFT",
+      "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+    );
     await bowNFT.deployed();
   });
 
@@ -28,7 +32,7 @@ describe("001.BowNFT", async () => {
 
     it("Read : symbol : Success✅", async () => {
       const symbol = await bowNFT.symbol();
-      expect(symbol).to.equal("BOWT");
+      expect(symbol).to.equal("B.O.W NFT");
     });
 
     it("Read : hasRole : Success✅", async () => {
@@ -44,13 +48,18 @@ describe("001.BowNFT", async () => {
       );
       expect(hasMinterRoleOneAddress).to.equal(false);
     });
+
+    it("Read : baseURI : Success✅", async () => {
+      const baseURI = await bowNFT.baseURI();
+      expect(baseURI).to.equal(
+        "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/"
+      );
+    });
   });
 
   describe("Transaction : safeMint", () => {
     it("Transaction : safeMint : Success✅ : Start tokenId from 1", async () => {
-      const safeMintTx = await bowNFT
-        .connect(admin)
-        .safeMint(admin.address, "www.bow.com/1", 100_000);
+      const safeMintTx = await bowNFT.connect(admin).safeMint(admin.address);
       await safeMintTx.wait();
 
       const balanceOf = await bowNFT.balanceOf(admin.address);
@@ -60,24 +69,13 @@ describe("001.BowNFT", async () => {
       expect(ownerOf).to.equal(admin.address);
 
       const tokenURI = await bowNFT.tokenURI(1);
-      expect(tokenURI).to.equal("www.bow.com/1");
-
-      const LWIN = await bowNFT.LWIN(1);
-      expect(LWIN).to.equal(100_000);
-
-      const lengthOfTokenIdsByLWIN = await bowNFT.lengthOfTokenIdsByLWIN(
-        100_000
+      expect(tokenURI).to.equal(
+        "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/1.json"
       );
-      expect(lengthOfTokenIdsByLWIN).to.equal(1);
-
-      const tokenIdByLWIN = await bowNFT.tokenIdByLWIN(100_000, 0);
-      expect(tokenIdByLWIN).to.equal(1);
     });
 
     it("Transaction : safeMint : Success✅ : tokenId 2", async () => {
-      const safeMintTx = await bowNFT
-        .connect(admin)
-        .safeMint(admin.address, "www.bow.com/2", 100_000);
+      const safeMintTx = await bowNFT.connect(admin).safeMint(admin.address);
       await safeMintTx.wait();
 
       const balanceOf = await bowNFT.balanceOf(admin.address);
@@ -87,24 +85,13 @@ describe("001.BowNFT", async () => {
       expect(ownerOf).to.equal(admin.address);
 
       const tokenURI = await bowNFT.tokenURI(2);
-      expect(tokenURI).to.equal("www.bow.com/2");
-
-      const LWIN = await bowNFT.LWIN(2);
-      expect(LWIN).to.equal(100_000);
-
-      const lengthOfTokenIdsByLWIN = await bowNFT.lengthOfTokenIdsByLWIN(
-        100_000
+      expect(tokenURI).to.equal(
+        "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/2.json"
       );
-      expect(lengthOfTokenIdsByLWIN).to.equal(2);
-
-      const tokenIdByLWIN = await bowNFT.tokenIdByLWIN(100_000, 1);
-      expect(tokenIdByLWIN).to.equal(2);
     });
 
     it("Transaction : safeMint : Failed❌ : AccessControl error : only minter role available", async () => {
-      const safeMintTx = bowNFT
-        .connect(one)
-        .safeMint(one.address, "www.bow.com/3", 100_000);
+      const safeMintTx = bowNFT.connect(one).safeMint(one.address);
 
       await expect(safeMintTx).to.revertedWith(
         `AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6`
@@ -128,9 +115,7 @@ describe("001.BowNFT", async () => {
     });
 
     it("Transaction : safeMint : Success✅ : tokenId 3 : one address also can mint by self", async () => {
-      const safeMintTx = await bowNFT
-        .connect(one)
-        .safeMint(one.address, "www.bow.com/3", 100_000);
+      const safeMintTx = await bowNFT.connect(one).safeMint(one.address);
       await safeMintTx.wait();
 
       const balanceOf = await bowNFT.balanceOf(one.address);
@@ -140,59 +125,9 @@ describe("001.BowNFT", async () => {
       expect(ownerOf).to.equal(one.address);
 
       const tokenURI = await bowNFT.tokenURI(3);
-      expect(tokenURI).to.equal("www.bow.com/3");
-
-      const LWIN = await bowNFT.LWIN(3);
-      expect(LWIN).to.equal(100_000);
-
-      const lengthOfTokenIdsByLWIN = await bowNFT.lengthOfTokenIdsByLWIN(
-        100_000
+      expect(tokenURI).to.equal(
+        "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/3.json"
       );
-      expect(lengthOfTokenIdsByLWIN).to.equal(3);
-
-      const tokenIdByLWIN = await bowNFT.tokenIdByLWIN(100_000, 2);
-      expect(tokenIdByLWIN).to.equal(3);
-    });
-  });
-
-  describe("Transaction : setLWIN", () => {
-    it("Transaction : setLWIN : Failed❌ : AccessControl error : only admin role available", async () => {
-      const setLWINTx = bowNFT.connect(one).setLWIN(1, 200_000);
-
-      await expect(setLWINTx).to.reverted;
-    });
-
-    it("Transaction : setLWIN : Failed❌ : invalid token id", async () => {
-      const setLWINTx = bowNFT.connect(admin).setLWIN(4, 200_000);
-
-      await expect(setLWINTx).to.revertedWith("invalid token id");
-    });
-
-    it("Transaction : setLWIN : Success✅", async () => {
-      const setLWINTx = await bowNFT.connect(admin).setLWIN(1, 200_000);
-      await setLWINTx.wait();
-
-      const LWIN1 = await bowNFT.LWIN(1);
-      expect(LWIN1).to.equal(200_000);
-
-      const lengthOfTokenIdsByLWIN200000 = await bowNFT.lengthOfTokenIdsByLWIN(
-        200_000
-      );
-      expect(lengthOfTokenIdsByLWIN200000).to.equal(1);
-
-      const lengthOfTokenIdsByLWIN100000 = await bowNFT.lengthOfTokenIdsByLWIN(
-        100_000
-      );
-      expect(lengthOfTokenIdsByLWIN100000).to.equal(2);
-
-      const tokenIdByLWIN200000index0 = await bowNFT.tokenIdByLWIN(200_000, 0);
-      expect(tokenIdByLWIN200000index0).to.equal(1);
-
-      const tokenIdByLWIN100000index0 = await bowNFT.tokenIdByLWIN(100_000, 0);
-      expect(Number(tokenIdByLWIN100000index0)).to.oneOf([2, 3]);
-
-      const tokenIdByLWIN100000index1 = await bowNFT.tokenIdByLWIN(100_000, 1);
-      expect(Number(tokenIdByLWIN100000index1)).to.oneOf([2, 3]);
     });
   });
 
@@ -204,9 +139,7 @@ describe("001.BowNFT", async () => {
     });
 
     it("Transaction : setTokenURI : Failed❌ : ERC721URIStorage: URI set of nonexistent token", async () => {
-      const setTokenURITx = bowNFT
-        .connect(admin)
-        .setTokenURI(4, "www.new.com/1");
+      const setTokenURITx = bowNFT.connect(admin).setTokenURI(4, "4.json");
 
       await expect(setTokenURITx).to.revertedWith(
         "ERC721URIStorage: URI set of nonexistent token"
@@ -215,15 +148,19 @@ describe("001.BowNFT", async () => {
 
     it("Transaction : setTokenURI : Success✅", async () => {
       const preTokenURI = await bowNFT.tokenURI(1);
-      expect(preTokenURI).to.equal("www.bow.com/1");
+      expect(preTokenURI).to.equal(
+        "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/1.json"
+      );
 
       const setTokenURITx = await bowNFT
         .connect(admin)
-        .setTokenURI(1, "www.new.com/1");
+        .setTokenURI(1, "11.json");
       await setTokenURITx.wait();
 
       const curTokenURI = await bowNFT.tokenURI(1);
-      expect(curTokenURI).to.equal("www.new.com/1");
+      expect(curTokenURI).to.equal(
+        "https://for-test-migration.s3.ap-northeast-2.amazonaws.com/11.json"
+      );
     });
   });
 
@@ -240,28 +177,11 @@ describe("001.BowNFT", async () => {
       const preTotalSupply = await bowNFT.totalSupply();
       expect(preTotalSupply).to.equal(3);
 
-      const preLengthOfTokenIdsByLWIN200000 =
-        await bowNFT.lengthOfTokenIdsByLWIN(200_000);
-      expect(preLengthOfTokenIdsByLWIN200000).to.equal(1);
-
-      const preTokenIdByLWIN200000index0 = await bowNFT.tokenIdByLWIN(
-        200_000,
-        0
-      );
-      expect(preTokenIdByLWIN200000index0).to.equal(1);
-
       const burnTx = await bowNFT.connect(admin).burn(1);
       await burnTx.wait();
 
       const curTotalSupply = await bowNFT.totalSupply();
       expect(curTotalSupply).to.equal(2);
-
-      const curLengthOfTokenIdsByLWIN200000 =
-        await bowNFT.lengthOfTokenIdsByLWIN(200_000);
-      expect(curLengthOfTokenIdsByLWIN200000).to.equal(0);
-
-      const curTokenIdByLWIN200000index0 = bowNFT.tokenIdByLWIN(200_000, 0);
-      await expect(curTokenIdByLWIN200000index0).to.revertedWithPanic("0x32");
     });
   });
 });

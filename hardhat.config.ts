@@ -11,13 +11,23 @@ const config: HardhatUserConfig = {
   networks: {
     baobab: {
       accounts: [
-        process.env.BAOBAB_ADMIN_PRIVATE_KEY!,
+        process.env.ADMIN_PRIVATE_KEY!,
         process.env.TEST_KEY_ONE!,
         process.env.TEST_KEY_TWO!,
       ],
-      chainId: 1001,
+      chainId: Number(process.env.KAS_CHAIN_ID)!,
       gasPrice: 250_000_000_000,
       url: "https://api.baobab.klaytn.net:8651",
+    },
+    cypress: {
+      accounts: [
+        process.env.ADMIN_PRIVATE_KEY!,
+        process.env.TEST_KEY_ONE!,
+        process.env.TEST_KEY_TWO!,
+      ],
+      chainId: Number(process.env.KAS_CHAIN_ID)!,
+      gasPrice: 250_000_000_000,
+      url: "https://public-node-api.klaytnapi.com/v1/cypress",
     },
   },
   gasReporter: {

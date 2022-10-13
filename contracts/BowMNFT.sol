@@ -19,9 +19,11 @@ contract BowMNFT is IERC5192, BowNFT {
         _;
     }
 
-    constructor(string memory _name, string memory _symbol)
-        BowNFT(_name, _symbol)
-    {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        string memory _baseURI
+    ) BowNFT(_name, _symbol, _baseURI) {
         setLock(true);
     }
 
