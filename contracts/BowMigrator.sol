@@ -2,11 +2,12 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./BowNFT.sol";
 import "./BowMNFT.sol";
 
-contract BowMigrator is AccessControl {
+contract BowMigrator is AccessControl, Ownable {
     ERC721 private preNFT;
     BowNFT private bowNFT;
     BowMNFT private bowMNFT;

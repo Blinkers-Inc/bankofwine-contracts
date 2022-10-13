@@ -27,7 +27,8 @@ const config: HardhatUserConfig = {
       ],
       chainId: Number(process.env.KAS_CHAIN_ID)!,
       gasPrice: 250_000_000_000,
-      url: "https://public-node-api.klaytnapi.com/v1/cypress",
+      // url: "https://public-node-api.klaytnapi.com/v1/cypress",
+      url: "https://klaytn03.fandom.finance/",
     },
   },
   gasReporter: {
